@@ -1,0 +1,5 @@
+default:
+  remi:
+    repo:
+      remi-php71:
+        enabled: True

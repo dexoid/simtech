@@ -1,0 +1,10 @@
+{% for block, param in params.items() |sort -%}
+[{{ block }}]
+{% for option,value in param.items() |sort -%}
+{% if value != 'None' -%}
+{{ option }} = {{ value }}
+{% else -%}
+{{ option }}
+{% endif -%}
+{% endfor -%}
+{% endfor -%}

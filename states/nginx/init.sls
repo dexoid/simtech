@@ -1,99 +1,34 @@
-{% if grains['os'] == 'CentOS' %}
-req.packages:
-  pkg.installed:
-    - pkgs:
-      - epel-release
-{% endif %}
+{% from "nginx/map.jinja" import map_nginx_settings with context %}
 
-{% if grains['os'] == 'CentOS' %}     
-php-fpm:
-  pkg:
-    - installed
-  service.running:
-    - watch:
-      - pkg: php-fpm
-      - file: /etc/php-fpm.d/www.conf
+include:
+  - ../common/yum/epel
 
-{% elif grains['os'] == 'Debian' %}
-
-php7.0-fpm:
-  pkg:
-    - installed
-  service.running:
-    - watch:
-      - pkg: php7.0-fpm
-      - file: /etc/php/7.0/fpm/pool.d/www.conf
-{% endif %}
+nginx_user:
+  user.present:
+    - name: {{ map_nginx_settings.params.user }}
+    - home: /var/cache/{{ map_nginx_settings.params.user }}
+    - shell: /sbin/nologin
+    - fullname: nginx user
 
 nginx:
-  pkg:
-    - installed
+  pkg.installed:
+    - name: nginx
   service.running:
-    - watch:
-      - pkg: nginx
-      - file: /etc/nginx/conf.d/site.conf
+    - name: nginx
+    - enable: true
+    - reload: true
+    - require:
+      - user: nginx_user
 
-
-/etc/nginx/conf.d/site.conf:
+nginx_config:
   file.managed:
-    - source: salt://nginx/data/etc/nginx/conf.d/site.conf
+    - name: /etc/nginx/nginx.conf
+    - source: salt://nginx/data/etc/nginx/nginx.conf.j2
     - template: jinja
     - user: root
     - group: root
     - mode: 640
-    - wwwuser: nginx
-    - wwwgroup: nginx
-    {% if grains['os'] == 'CentOS' %}
-    - wwwsock: /var/run/php-fpm/www.sock
-    {% elif grains['os'] == 'Debian' %}
-    - wwwsock: /tmp/www.sock
-    {% endif %}
-
-{% if grains['os'] == 'CentOS' %}
-/etc/php-fpm.d/www.conf:
-  file.managed:
-    - source: salt://nginx/data/etc/php-fpm.d/www.conf
-    - template: jinja
-    - user: root
-    - group: root
-    - mode: 640
-    - wwwuser: nginx
-    - wwwgroup: nginx
-    - wwwsock: /var/run/php-fpm/www.sock
-{% elif grains['os'] == 'Debian' %}
-/etc/php/7.0/fpm/pool.d/www.conf:
-  file.managed:
-    - source: salt://nginx/data/etc/php-fpm.d/www.conf
-    - template: jinja
-    - user: root
-    - group: root
-    - mode: 640
-    - wwwuser: www-data
-    - wwwgroup: www-data
-    - wwwsock: /tmp/www.sock
-{% endif %}
-
-/var/www:
-  file.directory:
-    {% if grains['os'] == 'CentOS' %}
-    - user:  nginx
-    - group:  nginx
-    {% elif grains['os'] == 'Debian' %}
-    - user:  www-data
-    - group:  www-data
-    {% endif %}
-    - name:  /var/www
-    - mode:  755
-
-/var/www/index.php:
-  file.managed:
-    - source: salt://nginx/data/var/www/index.php
-    {% if grains['os'] == 'CentOS' %}
-    - user: nginx
-    - group: nginx
-    {% elif grains['os'] == 'Debian' %}
-    - user:  www-data
-    - group:  www-data
-    {% endif %}
-    - mode: 755
+    - params: {{ map_nginx_settings.params }}
+    - watch_in:
+      - service: nginx
 

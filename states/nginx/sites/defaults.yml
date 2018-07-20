@@ -1,0 +1,4 @@
+default:
+  nginx:
+    common:
+      tmpl: 'salt://nginx/data/etc/nginx/conf.d/site.conf.j2'

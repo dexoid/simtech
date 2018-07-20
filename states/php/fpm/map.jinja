@@ -1,0 +1,9 @@
+{% import_yaml 'php/fpm/defaults.yml' as default_settings %}
+
+{% set map_phpfpm_settings = salt['pillar.get'](
+        'phpfpm',
+        default=default_settings.default.phpfpm,
+        merge=True
+    ) 
+%}
+

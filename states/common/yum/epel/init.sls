@@ -1,7 +1,7 @@
 # Completely ignore non-RHEL based systems
 {% if grains['os_family'] == 'RedHat' %}
 
-{% from "common/yum/map.jinja" import epel with context %}
+{% from "common/yum/epel/map.jinja" import epel with context %}
 
 install_pubkey_epel:
   file.managed:

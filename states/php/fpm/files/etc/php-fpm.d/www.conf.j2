@@ -1,0 +1,4 @@
+[www]
+{% for param, value in params.items() | sort() -%}
+{{ param }} = {{ value }}
+{% endfor -%}

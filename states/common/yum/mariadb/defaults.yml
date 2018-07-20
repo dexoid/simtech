@@ -1,0 +1,5 @@
+default:
+  mariadb_repo:
+    params:
+      version: 10.3
+

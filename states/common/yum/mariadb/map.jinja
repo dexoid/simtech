@@ -1,0 +1,9 @@
+{% import_yaml 'common/yum/mariadb/defaults.yml' as default_settings %}
+
+{% set map_mariadb_repo_settings = salt['pillar.get'](
+        'mariadb_repo',
+        default=default_settings.default.mariadb_repo,
+        merge=True
+    ) 
+%}
+
